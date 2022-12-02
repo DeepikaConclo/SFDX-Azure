@@ -1,0 +1,37 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pr:
+  autoCancel: "true"
+  branches:
+    include:
+    - Test
+    - main
+  paths:
+    exclude:
+    - README.md
+    - azure-pipelines.yml
+stages:
+- stage: TestSalesforceOrg
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/Test'))
+  jobs:
+  - job: DeployTestOrg
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '14.x'
+          checkLatest: true
+      - bash: 
+          npm install sfdx-cli --global
+        displayName: Install Salesforce CLI
+      - bash:
+            sfdx config:set restDeploy=false --global
+        displayName: Use SOAP API for Deployment
+      - bash:
+            sfdx force:auth:jwt:grant --clientid 3MVG9pRzvMkjMb6k8I6gPp2f_JABu34TdewVGrjMozULuDIY_bZMkIIqtkFDXU3wSqzAa9IoJgWNWzbUNMLNC --jwtkeyfile ./bin/server.key --username newdevorg@developer.com --instanceurl https://login.salesforce.com/
+        displayName: Authorize Salesforce DeployTestOrg Org
+      - bash:
+            sfdx force:source:deploy -p force-app -w 10 -u newdevorg@developer.com
+        displayName: Deploy source code to DeployTestOrg Org
