@@ -1,6 +1,6 @@
 import { LightningElement } from 'lwc';
 export default class LwcTest extends LightningElement {
-  input = 'Code & Dogss';
+  input = 'Code & Dogsss';
   changeHandler(event) {
     this.input = event.target.value;
   }
